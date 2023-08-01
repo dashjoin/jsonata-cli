@@ -17,6 +17,29 @@ usage: jsonata
  -o,--output <arg>           JSON output file (default=stdout)
 ```
 
+# Native compiled executable
+
+Advantages are extremely fast startup time, and no Java runtime requirements (only the executable is required).
+The total size of the CLI executable is around 14 MB, which contains all dependencies.
+
+Java CLI execution of a simple expression is around 120 milliseconds, whereas the native CLI executes in around 6 milliseconds:
+
+```sh
+# Startup time of Java CLI tool
+% time java -jar target/jsonata-cli-0.1-jar-with-dependencies.jar -e 1
+1
+java -jar target/jsonata-cli-0.1-jar-with-dependencies.jar -e 1  0.12s user 0.03s system 118% cpu 0.122 total
+
+# Startup time of native CLI tool
+% time ./jsonata -e 1                                                 
+1
+./jsonata -e 1  0.00s user 0.00s system 76% cpu 0.006 total
+```
+
+So startup is around 20x faster for the native CLI tool.
+Peak performance of the Java JIT is however up to 2x faster, even with GraalVM's profile-guided optimizations (PGO).
+
+
 # Preliminary results with large JSON files
 
 Data files:
