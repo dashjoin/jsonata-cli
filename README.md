@@ -39,6 +39,19 @@ java -jar target/jsonata-cli-0.1-jar-with-dependencies.jar -e 1  0.12s user 0.03
 So startup is around 20x faster for the native CLI tool.
 Peak performance of the Java JIT is however up to 2x faster, even with GraalVM's profile-guided optimizations (PGO).
 
+# Downloads
+
+Download ```jsonata-cli-VERSION-jar-with-dependencies.jar``` where VERSION is the latest version:
+
+https://repo1.maven.org/maven2/com/dashjoin/jsonata-cli/
+
+Now you can run the CLI with
+```sh
+java -jar jsonata-cli-VERSION-jar-with-dependencies.jar
+```
+
+## Native builds
+None released
 
 # Preliminary results with large JSON files
 
