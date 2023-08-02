@@ -46,6 +46,7 @@ public class Main {
         options.addOption("i", "input", true, "JSON input file (- for stdin)");
         options.addOption("o", "output", true, "JSON output file (default=stdout)");
         options.addOption("time", false, "Print performance timers to stderr");
+        options.addOption("c", "compact", false, "Compact JSON output (don't prettify)");
     }
 
     void run(String[] args) throws Throwable {
@@ -60,8 +61,8 @@ public class Main {
             printHelp();
             return;
         }
-
         String expr = cmd.getOptionValue("e");
+        boolean prettify = !cmd.hasOption("c");
 
         InputStream in = null;
         if (cmd.hasOption("i")) {
@@ -101,7 +102,7 @@ public class Main {
 
         long t3 = System.currentTimeMillis();
 
-        pout.println(Functions.string(res,true));
+        pout.println(Functions.string(res, prettify));
 
         long t4 = System.currentTimeMillis();
 
