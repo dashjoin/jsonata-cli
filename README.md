@@ -53,6 +53,8 @@ java -jar jsonata-cli-VERSION-jar-with-dependencies.jar
 ## Native builds
 None released
 
+## [Release change log](changelog.md)
+
 # Preliminary results with large JSON files
 
 Data files:
