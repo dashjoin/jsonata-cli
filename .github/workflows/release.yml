@@ -1,0 +1,33 @@
+name: jsonata-cli release build
+on: workflow_dispatch
+jobs:
+  build:
+    name: jsonata-cli on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '20'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      - name: Build with Maven
+        run: |
+          mvn package
+
+      - name: Build native image
+        run: |
+          native-image --pgo=native/default.iprof -jar target/jsonata-cli-*-jar-with-dependencies.jar -H:ReflectionConfigurationFiles=native/reflect-config.json -o jsonata
+          ./jsonata
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: jsonata-cli-${{ matrix.os }}
+          path: jsonata*
