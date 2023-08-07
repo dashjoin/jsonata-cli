@@ -1,13 +1,15 @@
 package com.dashjoin.jsonata.cli;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -31,24 +33,44 @@ public class Main {
         initCli();
     }
 
+    /**
+     * Init CLI options
+     */
     void initCli() {
         options = new Options();
         options.addOption("h", "help", false, "Display help and version info");
         // TODO options.addOption("j", "jsonargs", true, "Specify arguments as JSON object");
         options.addOption(Option.builder("e").longOpt("expression")
-                         .argName("jsonata")
+                         .argName("file")
                          .hasArg()
-                         .desc("(required) JSONata expression to evaluate")
+                         .desc("JSONata expression file to evaluate")
                          //.required()
                          .build());
-        //options.addOption("e", "expression", true, "JSONata expression to evaluate");
-        // TODO options.addOption("b", "bindings", true, "Optional JSONata bindings");
         options.addOption("i", "input", true, "JSON input file (- for stdin)");
         options.addOption("o", "output", true, "JSON output file (default=stdout)");
         options.addOption("time", false, "Print performance timers to stderr");
         options.addOption("c", "compact", false, "Compact JSON output (don't prettify)");
+        options.addOption(Option.builder("b").longOpt("bindings").
+            argName("json-string").hasArg().desc("JSONata variable bindings").build());
+        options.addOption(Option.builder("bf").longOpt("bindings-file").
+            argName("file").hasArg().desc("JSONata variable bindings file").build());
     }
 
+    /**
+     * Reads the given file into String
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    String readFile(String file) throws IOException {
+        return Files.readString(new File(file).toPath());
+    }
+
+    /**
+     * Runs the given args as JSONata command
+     * @param args
+     * @throws Throwable
+     */
     void run(String[] args) throws Throwable {
 
         CommandLineParser parser = new DefaultParser();
@@ -57,12 +79,22 @@ public class Main {
             printHelp();
             return;
         }
-        if (!cmd.hasOption("e")) {
+        if (!cmd.hasOption("e") && cmd.getArgList().isEmpty()) {
             printHelp();
             return;
         }
         String expr = cmd.getOptionValue("e");
+        if (expr != null)
+            expr = readFile(expr);
+        else
+            expr = cmd.getArgList().get(0);
+
         boolean prettify = !cmd.hasOption("c");
+
+        String bindingsStr = cmd.getOptionValue("b");
+        if (bindingsStr == null)
+            bindingsStr = readFile( cmd.getOptionValue("bf") );
+        Map<String, Object> bindingsObj = bindingsStr != null ? (Map<String, Object>)Json.parseJson(bindingsStr) : null;
 
         InputStream in = null;
         if (cmd.hasOption("i")) {
@@ -71,8 +103,6 @@ public class Main {
                 in = System.in;
             else
                 in = new FileInputStream(arg);
-
-            in = new BufferedInputStream(in, 262144);
         }
         OutputStream out = System.out;
         if (cmd.hasOption("o")) {
@@ -80,14 +110,8 @@ public class Main {
             out = new FileOutputStream(arg);
         }
 
-        PrintStream pout = new PrintStream(new BufferedOutputStream(out, 262144));
+        PrintStream pout = new PrintStream(out);
 
-        // byte[] buf = new byte[65536];
-        // StringBuilder sb = new StringBuilder();
-        // while (in.available()>0) {
-        //     int sz = in.read(buf);
-        //     sb.append(new String(buf, 0, sz, "utf-8"));
-        // }
         long t0 = System.currentTimeMillis();
 
         var input = in!=null ? Json.parseJson(new InputStreamReader(in)) : null;
@@ -95,10 +119,16 @@ public class Main {
         long t1 = System.currentTimeMillis();
 
         var jsonata = Jsonata.jsonata(expr);
+        var bindings = bindingsObj != null ? jsonata.createFrame() : null;
+        if (bindings != null) {
+            for (Map.Entry<String,Object> e : bindingsObj.entrySet()) {
+                bindings.bind( e.getKey(), e.getValue() );
+            }
+        }
 
         long t2 = System.currentTimeMillis();
 
-        var res = jsonata.evaluate(input);
+        var res = jsonata.evaluate(input, bindings);
 
         long t3 = System.currentTimeMillis();
 
@@ -114,10 +144,13 @@ public class Main {
         pout.flush();
     }
 
+    /**
+     * Print CLI help
+     */
     void printHelp() {
         System.out.println("JSONata CLI (C) Dashjoin GmbH");
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("jsonata", options);
+        formatter.printHelp("jsonata [options] <expression>", options);
     }
 
     public static void main(String[] args) throws Throwable {
