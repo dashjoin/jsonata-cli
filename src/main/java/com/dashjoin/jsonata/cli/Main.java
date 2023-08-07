@@ -91,9 +91,11 @@ public class Main {
 
         boolean prettify = !cmd.hasOption("c");
 
-        String bindingsStr = cmd.getOptionValue("b");
-        if (bindingsStr == null)
-            bindingsStr = readFile( cmd.getOptionValue("bf") );
+        String bindingsStr = cmd.getOptionValue("bf");
+        if (bindingsStr != null)
+            bindingsStr = readFile(bindingsStr);
+        else
+            bindingsStr = cmd.getOptionValue("b");
         Map<String, Object> bindingsObj = bindingsStr != null ? (Map<String, Object>)Json.parseJson(bindingsStr) : null;
 
         InputStream in = null;
