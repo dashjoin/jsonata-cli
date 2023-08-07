@@ -7,7 +7,6 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, macos-aarch64, windows-latest, ubuntu-latest]
-        node: [18]
     steps:
       - uses: actions/checkout@v3
 
@@ -28,7 +27,7 @@ jobs:
           ./jsonata
 
       - name: Upload binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jsonata-cli-${{ matrix.os }}
           path: jsonata*
