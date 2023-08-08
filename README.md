@@ -25,12 +25,6 @@ usage: jsonata [options] <expression>
 Download single file native CLI [executable artifacts for MacOS (x64 and aarch64),
 Linux (x64) and Windows (x64)](https://github.com/dashjoin/jsonata-cli/releases/)
 
-After downloading the executable, rename it to jsonata and save it in a folder that is included in your PATH environment.
-
-Note: on MacOS, the executable is not signed/notarized (yet).
-So depending on how you downloaded the file, [you might need to manually remove the quarantine attribute](https://developer.apple.com/forums/thread/666452#answers-list)
-```xattr -d com.apple.quarantine jsonata```
-
 ## Runnable Java Archive (JAR)
 
 Download ```jsonata-cli-VERSION-jar-with-dependencies.jar``` where VERSION is the latest version:
@@ -42,7 +36,17 @@ Now you can run the CLI with
 java -jar jsonata-cli-VERSION-jar-with-dependencies.jar
 ```
 
-## [Release change log](changelog.md)
+# Build from source
+
+After cloning the source code, build the JAR:
+```
+mvn package
+```
+
+Building the native executable (requires installed GraalVM):
+```
+mvn package -Pnative
+```
 
 # Performance
 
