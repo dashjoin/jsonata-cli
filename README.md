@@ -3,6 +3,8 @@ JSONata Command Line Tool
 
 Based on the [Java reference implementation of JSONata](https://github.com/dashjoin/jsonata-java), this is a CLI tool for JSON transformation using JSONata expressions.
 
+Inspired by ```jq```, it offers JSON processing and transformation from CLI, and can be easily installed with a single executable file.
+
 By design it's compilable as native executable using GraalVM, and as such offers low startup time, optimized memory requirements, and good peak performance.
 
 ```
