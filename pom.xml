@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-    <!-- parent>
+    <parent>
 	    <groupId>com.dashjoin</groupId>
 	    <artifactId>jsonata-parent</artifactId>
         <relativePath>../jsonata-java/pom</relativePath>
         <version>0.9.2</version>
-    </parent -->
+    </parent>
 
 	<properties>
         <revision>0.2</revision>
@@ -65,7 +65,8 @@
                     <imageName>jsonata</imageName>
                     <mainClass>${mainClass}</mainClass>
                     <buildArgs>
-                        <arg>-H:DashboardDump=jsonata -H:+DashboardAll -H:ReflectionConfigurationFiles=native/reflect-config.json</arg>
+                        <arg>--pgo=native/default.iprof -jar target/jsonata-cli-${revision}-jar-with-dependencies.jar -H:ReflectionConfigurationFiles=native/reflect-config.json -o jsonata</arg>
+                        <!--arg>-H:DashboardDump=jsonata -H:+DashboardAll</arg-->
                     </buildArgs>
                 </configuration>
                 <dependencies>
