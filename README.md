@@ -23,7 +23,7 @@ usage: jsonata [options] <expression>
 ## CLI executables
 
 Download single file native CLI [executable artifacts for MacOS (x64 and aarch64),
-Linux (x64) and Windows (x64)](https://github.com/dashjoin/jsonata-cli/actions/runs/5788231526)
+Linux (x64) and Windows (x64)](https://github.com/dashjoin/jsonata-cli/releases/)
 
 After downloading the executable, rename it to jsonata and save it in a folder that is included in your PATH environment.
 
