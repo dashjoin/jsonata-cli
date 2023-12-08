@@ -84,6 +84,8 @@ After cloning the source code, build the JAR:
 mvn package
 ```
 
+You can now run the packaged CLI with the script `scripts/jsonata`
+
 Building the native executable (requires installed GraalVM):
 ```
 mvn package -Pnative
