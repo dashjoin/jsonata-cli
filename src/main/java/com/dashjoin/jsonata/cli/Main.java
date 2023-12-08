@@ -38,6 +38,7 @@ public class Main {
      */
     void initCli() {
         options = new Options();
+        options.addOption("v", "version", false, "Display version info");
         options.addOption("h", "help", false, "Display help and version info");
         // TODO options.addOption("j", "jsonargs", true, "Specify arguments as JSON object");
         options.addOption(Option.builder("e").longOpt("expression")
@@ -75,6 +76,10 @@ public class Main {
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
+        if (cmd.hasOption("v")) {
+            printVersion();
+            return;
+        }
         if (cmd.hasOption("h")) {
             printHelp();
             return;
@@ -150,11 +155,34 @@ public class Main {
      * Print CLI help
      */
     void printHelp() {
-        System.out.println("JSONata CLI (C) Dashjoin GmbH");
+        System.out.println("JSONata CLI version "+Version.getVersion()+" by Dashjoin (https://dashjoin.com)\n"+
+        "\n" +
+        "CLI for the JSONata query and transformation language.\n"+
+        "More information at https://github.com/dashjoin/jsonata-cli\n"+
+        "\n" +
+        "Prettify JSON file: jsonata -i input.json -o pretty.json $\n"+
+        "Compact JSON file: jsonata -i input.json -o compact.json -c $\n"+
+        "Extract info: jsonata -i package-lock.json '[name, version]'\n" //+
+        //"Extract info: jsonata -i package-lock.json -o out.json '$keys(packages){$:$lookup($$.packages,$).version}'\n"
+        );
+
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("jsonata [options] <expression>", options);
     }
 
+    /**
+     * Prints the version.
+     */
+    void printVersion() {
+        System.out.println(Version.getVersion());
+    }
+
+    /**
+     * Main program
+     * 
+     * @param args CLI arguments
+     * @throws Throwable Error
+     */
     public static void main(String[] args) throws Throwable {
         Main main = new Main();
         main.run(args);
