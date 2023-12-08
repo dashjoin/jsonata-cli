@@ -20,6 +20,27 @@ usage: jsonata [options] <expression>
  -time                         Print performance timers to stderr
 ```
 
+# Examples
+```
+% echo '{"a":"hello", "b":" world"}' | jsonata -i - '(a & b)'
+hello world
+
+% echo '{"a":"hello", "b":" world"}' | jsonata -i - -o helloworld.json $
+
+% curl -s https://raw.githubusercontent.com/jsonata-js/jsonata/master/test/test-suite/datasets/dataset1.json | jsonata -i - '{"Name": FirstName & " " & Surname, "Cities": **.City, "Emails": Email[type="home"].address}'
+{
+  "Name": "Fred Smith",
+  "Cities": [
+    "Winchester",
+    "London"
+  ],
+  "Emails": [
+    "freddy@my-social.com",
+    "frederic.smith@very-serious.com"
+  ]
+}
+```
+
 # Downloads
 
 ## CLI executables
