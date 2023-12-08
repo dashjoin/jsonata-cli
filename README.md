@@ -7,8 +7,25 @@ Inspired by ```jq```, it offers JSON processing and transformation from CLI, and
 
 By design it's compilable as native executable using GraalVM, and as such offers low startup time, optimized memory requirements, and good peak performance.
 
+# Installation
+
+The jsonata CLI can be installed with homebrew:
+```
+% brew install dashjoin/tap/jsonata
+```
+The brew installation requires an installed Java runtime (`brew install java`).
+
 ```
 % jsonata
+JSONata CLI by Dashjoin (https://dashjoin.com)
+
+CLI for the JSONata query and transformation language.
+More information at https://github.com/dashjoin/jsonata-cli
+
+Prettify JSON file: jsonata -i input.json -o pretty.json $
+Compact JSON file: jsonata -i input.json -o compact.json -c $
+Extract info: jsonata -i package-lock.json '[name, version]'
+
 usage: jsonata [options] <expression>
  -b,--bindings <json-string>   JSONata variable bindings
  -bf,--bindings-file <file>    JSONata variable bindings file
@@ -18,6 +35,7 @@ usage: jsonata [options] <expression>
  -i,--input <arg>              JSON input file (- for stdin)
  -o,--output <arg>             JSON output file (default=stdout)
  -time                         Print performance timers to stderr
+ -v,--version                  Display version info
 ```
 
 # Examples
