@@ -1,0 +1,2 @@
+#/bin/sh
+java -Xmx8g -jar target/jsonata-cli-*-jar-with-dependencies.jar $*
