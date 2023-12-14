@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -48,6 +47,7 @@ public class Main {
                          //.required()
                          .build());
         options.addOption("i", "input", true, "JSON input file (- for stdin)");
+        options.addOption("f", "format", true, "Input format (default=auto)");
         options.addOption("o", "output", true, "JSON output file (default=stdout)");
         options.addOption("time", false, "Print performance timers to stderr");
         options.addOption("c", "compact", false, "Compact JSON output (don't prettify)");
@@ -131,8 +131,11 @@ public class Main {
 
         long t0 = System.currentTimeMillis();
 
+        String formatStr = cmd.getOptionValue("f", TerminalUtil.InputFormat.auto.name());
+        TerminalUtil.InputFormat format = TerminalUtil.InputFormat.valueOf(formatStr);
+
         if (in!=null)
-            input = Json.parseJson(new InputStreamReader(in));
+            input = TerminalUtil.readInput(in, format);
 
         long t1 = System.currentTimeMillis();
 
