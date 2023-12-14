@@ -11,13 +11,23 @@ By design it's compilable as native executable using GraalVM, and as such offers
 
 The jsonata CLI can be installed with homebrew:
 ```
-% brew install dashjoin/tap/jsonata
+brew install dashjoin/tap/jsonata
 ```
 The brew installation requires an installed Java runtime (`brew install java`).
+We left out the dependency from brew so you can use any Java runtime you like.
+
+## Update
+
+If installed with homebrew, you can update with
+```
+brew upgrade jsonata
+```
+
+# JSONata Command Line Interface
 
 ```
 % jsonata
-JSONata CLI by Dashjoin (https://dashjoin.com)
+JSONata CLI version 0.9.5-0.4 by Dashjoin (https://dashjoin.com)
 
 CLI for the JSONata query and transformation language.
 More information at https://github.com/dashjoin/jsonata-cli
@@ -31,21 +41,34 @@ usage: jsonata [options] <expression>
  -bf,--bindings-file <file>    JSONata variable bindings file
  -c,--compact                  Compact JSON output (don't prettify)
  -e,--expression <file>        JSONata expression file to evaluate
+ -f,--format <arg>             Input format (default=auto)
  -h,--help                     Display help and version info
  -i,--input <arg>              JSON input file (- for stdin)
+ -ic,--icharset <arg>          Input character set (default=UTF-8)
  -o,--output <arg>             JSON output file (default=stdout)
+ -oc,--ocharset <arg>          Output character set (default=UTF-8)
  -time                         Print performance timers to stderr
  -v,--version                  Display version info
 ```
 
 # Examples
 ```
-% echo '{"a":"hello", "b":" world"}' | jsonata -i - '(a & b)'
+% echo '{"a":"hello", "b":" world"}' | jsonata '(a & b)'
 hello world
 
-% echo '{"a":"hello", "b":" world"}' | jsonata -i - -o helloworld.json $
+% echo '{"a":"hello", "b":" world"}' | jsonata -o helloworld.json $
+# helloworld.json written
 
-% curl -s https://raw.githubusercontent.com/jsonata-js/jsonata/master/test/test-suite/datasets/dataset1.json | jsonata -i - '{"Name": FirstName & " " & Surname, "Cities": **.City, "Emails": Email[type="home"].address}'
+% ls | jsonata $
+Applications
+Library
+System
+...
+
+% ps -o pid="",%cpu="",%mem="" | jsonata '$.$split(/\n/).$trim().[ $split(/\s+/).$number() ]' -c
+[[1,3.2,0.1],[382,0,0],[501,0.5,0.1],[502,0,0],...
+
+% curl -s https://raw.githubusercontent.com/jsonata-js/jsonata/master/test/test-suite/datasets/dataset1.json | jsonata '{"Name": FirstName & " " & Surname, "Cities": **.City, "Emails": Email[type="home"].address}'
 {
   "Name": "Fred Smith",
   "Cities": [
