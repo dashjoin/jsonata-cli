@@ -104,13 +104,23 @@ public class Main {
         Map<String, Object> bindingsObj = bindingsStr != null ? (Map<String, Object>)Json.parseJson(bindingsStr) : null;
 
         InputStream in = null;
-        if (cmd.hasOption("i")) {
-            String arg = cmd.getOptionValue("i");
-            if ("-".equals(arg))
-                in = System.in;
+        Object input = null;
+        {
+            String arg = cmd.getOptionValue("i", "-");
+            if ("-".equals(arg)) {
+                // stdin is used by default if we get input through a pipe,
+                // or if the arg "-i -" is forced by the user.
+                // If we are only calling the executable without input (console()==null)
+                // use NULL input (which allows to execute expressions without input)
+                if (System.console()==null || cmd.hasOption("i"))
+                    in = System.in;
+                else
+                    input = Jsonata.NULL_VALUE;
+            }
             else
                 in = new FileInputStream(arg);
         }
+
         OutputStream out = System.out;
         if (cmd.hasOption("o")) {
             String arg = cmd.getOptionValue("o");
@@ -121,7 +131,8 @@ public class Main {
 
         long t0 = System.currentTimeMillis();
 
-        var input = in!=null ? Json.parseJson(new InputStreamReader(in)) : null;
+        if (in!=null)
+            input = Json.parseJson(new InputStreamReader(in));
 
         long t1 = System.currentTimeMillis();
 
