@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import com.dashjoin.jsonata.Functions;
+import com.dashjoin.jsonata.JException;
 import com.dashjoin.jsonata.Jsonata;
 import com.dashjoin.jsonata.json.Json;
 
@@ -27,6 +30,8 @@ import com.dashjoin.jsonata.json.Json;
 public class Main {
 
     Options options;
+    String expr;
+    String exprFile;
 
     Main() {
         initCli();
@@ -88,9 +93,9 @@ public class Main {
             printHelp();
             return;
         }
-        String expr = cmd.getOptionValue("e");
-        if (expr != null)
-            expr = readFile(expr);
+        exprFile = cmd.getOptionValue("e");
+        if (exprFile != null)
+            expr = readFile(exprFile);
         else
             expr = cmd.getArgList().get(0);
 
@@ -191,6 +196,65 @@ public class Main {
         System.out.println(Version.getVersion());
     }
 
+    static class ErrorDetails {
+        /**
+         * Hint string showing the error location
+         */
+        String hint;
+        /**
+         * Row of the error
+         */
+        int row;
+        /**
+         * Column of the error
+         */
+        int column;
+    }
+
+    /**
+     * Returns the error details: row, column,
+     * and a hint that points to the error.
+     * Supports multi-line expressions
+     * 
+     * @param location (character index)
+     * @return error details
+     */
+    ErrorDetails getErrorDetails(int location) {
+        int lineStart = -1;
+        int line = 0;
+
+        StringWriter sw = new StringWriter();
+        PrintWriter err = new PrintWriter(sw);
+
+        for (int i=0; i<expr.length(); i++) {
+            if (i>=location)
+                break;
+            if ("\n\r".contains(""+expr.charAt(i))) {
+                lineStart = i;
+                line++;
+            }
+        }
+        int col = location - lineStart - 1;
+        for (int i=lineStart+1; i<expr.length(); i++) {
+            if ("\n\r".contains(""+expr.charAt(i)))
+                break;
+            err.print(expr.charAt(i));
+        }
+        err.println();
+        for (int i=0; i<col-1; i++) {
+            err.print(" ");
+        }
+        err.println("^");
+
+        err.close();
+
+        ErrorDetails e = new ErrorDetails();
+        e.hint = sw.toString();
+        e.row = line;
+        e.column = col;
+        return e;
+    }
+
     /**
      * Main program
      * 
@@ -199,6 +263,17 @@ public class Main {
      */
     public static void main(String[] args) throws Throwable {
         Main main = new Main();
-        main.run(args);
+        try {
+            main.run(args);
+        } catch (JException jex) {
+            ErrorDetails e = main.getErrorDetails(jex.getLocation());
+            // Print error location so that VSCode directly jumps to the error
+            // (if it's in a file "-e exprfile")
+            System.err.println("JSONata error at "+
+                (main.exprFile==null ? "expression":main.exprFile)+":"+(e.row+1)+"."+(e.column));
+            System.err.println(jex.getMessage());
+            System.err.println();
+            System.err.println(e.hint);
+        }
     }
 }
