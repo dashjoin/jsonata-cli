@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Map;
 
@@ -44,7 +45,6 @@ public class Main {
         options = new Options();
         options.addOption("v", "version", false, "Display version info");
         options.addOption("h", "help", false, "Display help and version info");
-        // TODO options.addOption("j", "jsonargs", true, "Specify arguments as JSON object");
         options.addOption(Option.builder("e").longOpt("expression")
                          .argName("file")
                          .hasArg()
@@ -52,8 +52,10 @@ public class Main {
                          //.required()
                          .build());
         options.addOption("i", "input", true, "JSON input file (- for stdin)");
+        options.addOption("ic", "icharset", true, "Input character set (default=UTF-8)");
         options.addOption("f", "format", true, "Input format (default=auto)");
         options.addOption("o", "output", true, "JSON output file (default=stdout)");
+        options.addOption("oc", "ocharset", true, "Output character set (default=UTF-8)");
         options.addOption("time", false, "Print performance timers to stderr");
         options.addOption("c", "compact", false, "Compact JSON output (don't prettify)");
         options.addOption(Option.builder("b").longOpt("bindings").
@@ -108,6 +110,9 @@ public class Main {
             bindingsStr = cmd.getOptionValue("b");
         Map<String, Object> bindingsObj = bindingsStr != null ? (Map<String, Object>)Json.parseJson(bindingsStr) : null;
 
+        String icharset = cmd.getOptionValue("ic", "UTF-8");
+        String ocharset = cmd.getOptionValue("oc", "UTF-8");
+
         InputStream in = null;
         Object input = null;
         {
@@ -132,7 +137,7 @@ public class Main {
             out = new FileOutputStream(arg);
         }
 
-        PrintStream pout = new PrintStream(out);
+        PrintStream pout = new PrintStream(out, false, ocharset);
 
         long t0 = System.currentTimeMillis();
 
@@ -140,7 +145,7 @@ public class Main {
         TerminalUtil.InputFormat format = TerminalUtil.InputFormat.valueOf(formatStr);
 
         if (in!=null)
-            input = TerminalUtil.readInput(in, format);
+            input = TerminalUtil.readInput(in, format, Charset.forName(icharset));
 
         long t1 = System.currentTimeMillis();
 

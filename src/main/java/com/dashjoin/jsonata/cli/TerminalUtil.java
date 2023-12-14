@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+
 import com.dashjoin.jsonata.json.Json;
 
 /**
@@ -37,11 +39,12 @@ public class TerminalUtil {
      * 
      * @param in
      * @param format
+     * @param cs
      * @return Input object
      * @throws IOException
      * @throws UnsupportedEncodingException
      */
-    public static Object readInput(InputStream in, InputFormat format)
+    public static Object readInput(InputStream in, InputFormat format, Charset cs)
             throws IOException, UnsupportedEncodingException {
         Object input = null;
         switch (format) {
@@ -51,11 +54,11 @@ public class TerminalUtil {
                 try {
                     // First try JSON, if there is an error,
                     // reset the stream and use string format
-                    return readInput(in, InputFormat.json);
+                    return readInput(in, InputFormat.json, cs);
                 } catch (Exception ex) {
                     if (in.markSupported()) {
                         in.reset();
-                        return readInput(in, InputFormat.string);
+                        return readInput(in, InputFormat.string, cs);
                     }
                     // We cannot reset the stream: throw the exception
                     // Need to specify the format manually in this case
@@ -63,7 +66,7 @@ public class TerminalUtil {
                 }
             }
             case json: {
-                input = Json.parseJson(new InputStreamReader(in));
+                input = Json.parseJson(new InputStreamReader(in, cs));
                 break;
             }
             case string: {
@@ -72,7 +75,7 @@ public class TerminalUtil {
                 for (int length; (length = in.read(buffer)) != -1;) {
                     result.write(buffer, 0, length);
                 }
-                input = result.toString("UTF-8");
+                input = result.toString(cs);
                 break;
             }
             default:
